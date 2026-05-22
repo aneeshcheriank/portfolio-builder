@@ -1,5 +1,4 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from typing import TypedDict, Annotated
 import operator
 from langchain_core.messages import ToolMessage
 from langgraph.graph import END
@@ -7,55 +6,16 @@ from langgraph.graph import END
 from src.model import get_llm
 from src.tools import index_matcher_tool_mappping, index_matcher_tool_list, stock_picker_tool_list, stock_picker_tool_mapping
 from src.temp import optimize_portfolio_weights
-from src.configuration import MAX_TOOL_CALLS
-from src.output_schema import IndexReport, StockSelectionReport, PortfolioReport
+from src.config import MAX_TOOL_CALLS
+from src.schema import IndexReport, StockSelectionReport, PortfolioReport
 from src.temp import portfolio_optimizer_tool_mapping, portfolio_optimizer_tool_list
-
-# Index picker agent implementation
-# Define the graph state
-class AgentState(TypedDict):
-    user_input: str
-
-    chat_history: Annotated[list, operator.add]
-    stock_picker_history: Annotated[list, operator.add]
-    portfolio_optimizer_history: Annotated[list, operator.add]
-    
-    investing_sum: float
-    risk_class: str
-    expected_return: float
-    perceived_volatility: float
-    actual_volatility: float
-    base_index: str
-    risk_free_rate: float
-    filtered_stocks: StockSelectionReport # from python 3.9 onwards, we can use list[str] instead of List[str]
-    portfolio: PortfolioReport
-
-    iterations: int
-    iterations_stock_picker: int
-    iterations_portfolio_optimizer: int
+from src.state import AgentState
+from src import prompts
 
 
 def index_matcher(state: AgentState):
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-     """You are an expert financial portfolio manager. Your task is to match a client's risk and investment profile to the most appropriate index not ETFs or Stocks.
-     you are expected to use tools to find the best index for a volatility target. You will be provided with a client's input describing their 
-     investment goals and risk tolerance, and you must convert that into a target volatility. Then, using the get_best_index_for_volatility tool, 
-     you will identify the best matching index.
-
-     IMPORTANT: 
-     - Find the investment sum, and the expected return (mininum return the user is expecting from the investment, in a 7 point scale)
-     - Find the risk scale of the user in a 7 point risk scale
-     - 7-point risk scale points ('Extremely Low', 'Very Low', 'Low', 'Medium', 'High', 'Very High', 'Extremely High')
-     - You must select an index that reflect the risk and return perference of the user. 
-     - You can call the tools at most 5-10 times
-     - Do not repeatedly call the tool with similar input
-     - If a close match is found, stop and provide the answer
-     """),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{user_input}")
-    ])
+    prompt = prompts.index_matcher_prompt
 
     llm = get_llm()
     tool_list = index_matcher_tool_list()
@@ -117,16 +77,7 @@ def tool_router(state: AgentState):
 def summarizer_node(state: AgentState):
     # this node will summarize the tool calls and provide a final answer
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-     """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
-     the output from the previous tool calls, which includes the best matching index and its volatility, and format it into a clear and concise 
-     report for the client. The report should include the recommended index, its actual volatility, how it compares to the client's target volatility, 
-     and any relevant insights or recommendations based on this information. 
-     user input: {user_input}
-     """),
-        MessagesPlaceholder(variable_name="chat_history")
-    ])
+    prompt = prompts.index_picker_summurizer_prompt
 
     
     llm = get_llm()
@@ -139,26 +90,9 @@ def summarizer_node(state: AgentState):
     return {"chat_history": [response]}    
 
 def formatter_node(state: AgentState):
-    # # 1. Convert the message history into a clean string for the reporter
-    # # This prevents the "Unknown Tool" error and the "List vs Object" error.
-    # context_string = ""
-    # for msg in state["chat_history"]:
-    #     # Ensure we capture text from AI messages and the actual data from Tool messages
-    #     if msg.type == "ai" and msg.content:
-    #         context_string += f"AI Thought: {msg.content}\n"
-    #     elif msg.type == "tool":
-    #         context_string += f"Tool Result: {msg.content}\n"
-    #     # If the user mentioned a target volatility, include that too
-    #     elif msg.type == "human":
-    #         context_string += f"User Request: {msg.content}\n"
     context_string = state["chat_history"][-1].content if state["chat_history"] else ""
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are an expert financial reporter. 
-         Review the following research context and extract the final details 
-         into the required structured format."""),
-        ("human", "Research Context:\n\n{context}")
-    ])
+    prompt = prompts.index_picker_formatter_prompt
     
     llm = get_llm()
     # Structured output works best when the input is plain text context
@@ -187,58 +121,7 @@ def formatter_node(state: AgentState):
 # - select the stock in the index based of alpha, beta, PE and other related factors
 def stock_picker(state: AgentState):
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system","""
-        You are a financial equity screener.
-
-        Your task is to select high-quality stocks from the given index: {base_index}, 
-        based on the user's risk profile and investment objective.
-        
-        INPUT:
-        - Investment objective: {user_input}
-        - Target volatility: {perceived_volatility}
-        - Risk class of user: {risk_class}
-        - Expected return: {expected_return}
-        
-        INSTRUCTIONS:
-        
-        1. Use the tool `get_index_constituents` to retrieve stocks in the index.
-        2. Use `get_stock_analytics` to fetch real financial data. Never guess values.
-        
-        SELECTION CRITERIA:
-        
-        - Prefer stocks with:
-          - postive alpha
-          - Beta aligned with target volatility:
-              * Low risk: beta < 0.8
-              * Moderate risk: beta between 0.8–1.2
-              * High risk: beta > 1.2
-          - Reasonable valuation (avoid extreme P/E ratios)
-         
-        - Index stock tickers:
-            - you have to get the constituent stocks of the index from your memory
-            - dont use tools to collect this information
-        
-        - Ensure basic diversification:
-          - Avoid selecting too many stocks from the same sector
-          - Limit highly correlated stocks (e.g., too many semiconductors)
-         
-        - Select manageable number of stock selection
-            - select stocks based on {investing_sum}. 
-                - select 20 stock for 1000 $
-                - select 60 stocks for 10000 $
-                - select around 120 stocks for 100000 $
-        
-        
-        OUTPUT:
-        Return a list of selected stocks with their analytics.
-        Do not calculate weights.
-        """),
-        ("human", """
-         investment objective: {user_input}, base index: {base_index}, target volatility: {perceived_volatility}, risk free rate: {risk_free_rate}.
-         stock picking history: {stock_picker_history}.
-         """),
-    ])
+    prompt = prompts.stock_picker_prompt
 
     llm = get_llm()
     llm_with_tools = llm.bind_tools(stock_picker_tool_list) # need to define a new output schema for the stock picker
@@ -305,11 +188,21 @@ def tool_call_node_stock_picker(state: AgentState):
 
 def stock_picker_summarizer(state: AgentState)->str:
     prompt = """
-You are a financial reportor, with 10 years of experice in this field. Carefully go through the financail messages between various entites
-and summariye the converation beteen various agents and tools.
-CRITICAL:
-Please makeup any information. Only summarize the information in this conversation {chat_history}
-"""
+    You are a financial reportor, with 10 years of experice in this field. Carefully go through the financail messages between various entites
+    and summariye the converation beteen various agents and tools.
+    CRITICAL:
+    Please makeup any information. Only summarize the information in this conversation {chat_history}
+    """
+
+    llm = get_llm()
+    chain = prompt | llm
+    response = chain.invoke({
+        "chat_history": state.get("stock_picker_history")
+    })
+
+    return {
+        "stock_picker_history": response
+    }
 
 def formatter_node_stock_picker(state: AgentState):
     # # 1. Convert the message history into a clean string for the reporter
@@ -322,14 +215,7 @@ def formatter_node_stock_picker(state: AgentState):
     # genearte ouput form the summarized output of the stock stock picker agents interactions
     last_message = state["stock_picker_history"][-1]
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-         """You are an expert financial reporter. 
-         Take the following context (User goals and Tool results) and 
-         generate the final IndexReport.
-         """),
-        ("human", "Here is the investment context:\n\n{context}")
-    ])
+    prompt = prompts.fromatter_node_stock_picker_prompt
     
     llm = get_llm()
     # Structured output works best when the input is plain text context
