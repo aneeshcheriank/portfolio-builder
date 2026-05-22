@@ -6,7 +6,7 @@ To configure global constants
 MODEL = "llama-3.3-70b-versatile"
 
 # tool call
-MAX_TOOL_CALLS = 10
+MAX_TOOL_CALLS = 5
 
 # API key
-"DEEPSEEK"
+api_key_var = "DEEPSEEK"
