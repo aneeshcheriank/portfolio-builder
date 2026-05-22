@@ -83,8 +83,8 @@ def summarizer_node(state: AgentState):
     llm = get_llm()
     chain = prompt | llm
     response = chain.invoke({
-        "chat_history": state["chat_history"],
-        "user_input": state["user_input"]
+        "context": state["chat_history"],
+        "objective": state["user_input"]
     })
 
     return {"chat_history": [response]}    
@@ -187,12 +187,15 @@ def tool_call_node_stock_picker(state: AgentState):
     }
 
 def stock_picker_summarizer(state: AgentState)->str:
-    prompt = """
+    prompt = ChatPromptTemplate([
+        ("system", """
     You are a financial reportor, with 10 years of experice in this field. Carefully go through the financail messages between various entites
     and summariye the converation beteen various agents and tools.
     CRITICAL:
-    Please makeup any information. Only summarize the information in this conversation {chat_history}
-    """
+    Please makeup any information. Only summarize the information in this conversation
+    """),
+    ("human", "{chat_history}")
+    ])
 
     llm = get_llm()
     chain = prompt | llm
@@ -201,7 +204,7 @@ def stock_picker_summarizer(state: AgentState)->str:
     })
 
     return {
-        "stock_picker_history": response
+        "stock_picker_history": [response]
     }
 
 def formatter_node_stock_picker(state: AgentState):
