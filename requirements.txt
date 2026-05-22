@@ -8,4 +8,6 @@ langgraph == 1.1.4
 pydantic == 2.12.5
 wikipedia == 1.4.0
 dotenv==0.9.9
+ddgs==9.14.4
+scipy==1.17.1
 
