@@ -1,0 +1,84 @@
++-------------------------------------------------------+
+|  MULTI-AGENT DIRECT INDEXING PORTFOLIO BUILDER FLOW  |
++-------------------------------------------------------+
+                           |
+                           | 1. User Inputs
+                           | (e.g., "Moderate Risk, €10k, Growth-oriented")
+                           v
++--------------------------+----------------------------+
+|         AGENT 1: RISK & INDEX MATCHMAKER             |
+|                                                       |
+|  Tasks:                                               |
+|  * Analyze user input (Risk/Objective).               |
+|  * Translate Risk to Target Volatility (e.g., 12%).   |
+|  * Identify appropriate parent index for risk level.   |
+|                                                       |
+|  [MEMORY STATE]: Target Volatility=X; Base Index=Y   |
++--------------------------+----------------------------+
+                           |
+| 2. Base Index Selected   |
+| (e.g., STOXX 600)        |
+v                           |
++--------------------------+----------------------------+
+|        AGENT 2: DIRECT INDEXING SCREENER             |
+|                                                       |
+|  Tasks:                                               |
+|  * Call Data API for all underlying stocks in         |
+|    Base Index Y.                                      |
+|  * Apply Fundamental Filters:                         |
+|     - Positive Alpha (>0)                             |
+|     - Beta within +/- 0.2 of Target Volatility       |
+|     - Lower 25% of P/E in sector                      |
+|                                                       |
+|  [MEMORY STATE]: Adds filtered list of ~100 tickers  |
++--------------------------+----------------------------+
+                           |
+| 3. Filtered Stock List   |
+| + target risk constraints|
+v                           |
++--------------------------+----------------------------+
+|        AGENT 3: REBALANCER & OPTIMIZER                |
+|                                                       |
+|  Tasks:                                               |
+|  * Apply Optimization Math to Filtered List.          |
+|  * Goals:                                              |
+|     - Match Target Volatility (from Agent 1).          |
+|     - Maximize diversification / minimize risk parity.|
+|     - ENFORCE CONSTRAINTS: Capping single stock at 5%;|
+|       Sector concentration at 20%.                     |
+|                                                       |
+|  [MEMORY STATE]: Adds specific weights for tickers   |
++--------------------------+----------------------------+
+                           |
+| 4. Proposed Portfolio    |
+| (Tickers + Weights)      |
+v                           |
++--------------------------+----------------------------+
+|                   INTERNAL REVIEW LOOP                |
+|               (Critique or Self-Reflection)           |
++--------------------------+----------------------------+
+                           |
+                           | 5. Review Output
+                           | (e.g., Trace=Yes/No)
+                           v
+                 (FAIL: Trace Error > 3% OR)
+                 (Too concentrated)
+        +-----------------------------------+
+        |                                   |
+        |  Feedback Loop back to Agent 2:  |
+        |  "Optimization failed constraints.|
+        |  Relax P/E filter or diversify."  |
+        |                                   |
+        +-----------------------------------+
+                           |
+                  (PASS: Satisfies Constraints)
+                           |
+                           v
++--------------------------+----------------------------+
+|        FINAL OUTPUT: CUSTOM OPTIMIZED INDEX           |
+|                                                       |
+|   Results:                                            |
+|   * Portfolio of 75 high-quality STOXX 600 stocks.   |
+|   * Optimized for moderate risk/growth goal.          |
+|   * Within concentration & tracking error limits.    |
++-------------------------------------------------------+
