@@ -248,41 +248,7 @@ def tool_router_stock_picker(state: AgentState):
     return "stock_picker_summarizer"
 
 def portfolio_optimizer(state: AgentState):
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """
-        ### ROLE
-        You are a Senior Portfolio Manager specializing in Quantitative Asset Allocation. You have 10+ years of experience in Modern Portfolio Theory and Risk 
-         Parity strategies.
-    
-        ### OBJECTIVE
-        Your goal is to allocate an investable sum {investing_sum} across a curated list of stocks to meet the client's risk and return objetives.
-        The client has a risk of {user_risk} in 7 point risk scale ('Extremely Low', 'Very Low', 'Low', 'Medium', 'High', 'Very High', 'Extremely High')
-        The expected return of the client is {expected_return}
-         
-        ### No of stocks
-        - 1000 $: 5-10 stocks
-        - 10000 $: 10-20 stocks
-        - 100000 $: 20-40 stocks
-    
-        ### INPUT DATA
-        - Selected Stocks & Analytics: {selected_stocks}
-    
-        ### OPERATIONAL GUIDELINES
-        1. **Weight Optimization**: Use the `optimize_portfolio_weights` tool. Pass the list of tickers from the selected stocks and the target volatility (as a decimal) derived from the user objective.
-        2. **Concentration Risk**: Ensure no single stock exceeds 10% of the portfolio to maintain diversification.
-        3. **Minimum Position Size**: Do not allocate weights less than 2% ($20) to any single stock, as small positions are inefficient.
-        4. **Risk Alignment**: 
-            - For Low Risk: Target Volatility ~0.05 - 0.08
-            - For Moderate Risk: Target Volatility ~0.09 - 0.13
-            - For High Risk: Target Volatility ~0.14 - 0.20
-    
-        ### EXECUTION FLOW
-        - First, call `optimize_portfolio_weights` with the appropriate parameters.
-        - Once you receive the tool output, verify that the weights sum to 100%.
-        - If the tool fails, suggest an equal-weighted portfolio as a fallback and explain why.
-        """),
-        MessagesPlaceholder(variable_name="portfolio_optimizer_history")
-    ])
+    prompt = prompts.portfolio_optimizer_prompt
 
     llm = get_llm()
     llm_with_tools = llm.bind_tools(portfolio_optimizer_tool_list)
@@ -352,21 +318,8 @@ def tool_router_portfolio_optimizer(state: AgentState):
 def summarizer_portfolio_optimizer(state: AgentState):
     # this node will summarize the tool calls and provide a final answer
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-     """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
-     the output from the previous tool calls, which messages to find the best portfolio weights for a target volatility.
-     - Summarize the details (do not include extra information) for futher processing.
-     - capture all informations
-     CRITICAL: 
-     - You must use the EXACT weights provided in the last ToolMessage. 
-     - DO NOT recalculate, round differently, or equalize the weights. 
-     - If the tool says AAPL is 0.0829, you must report 0.0829.
-     """),
-        MessagesPlaceholder(variable_name="chat_history")
-    ])
+    prompt = prompts.summarize_portfolio_optimizer_prompt
 
-    
     llm = get_llm()
     chain = prompt | llm
     response = chain.invoke({
@@ -379,14 +332,7 @@ def formatter_node_portfolio(state: AgentState):
    
    last_message = state["portfolio_optimizer_history"][-1]
 
-   prompt = ChatPromptTemplate.from_messages([
-       ("system",
-        """You are an expert financial reporter. 
-        Take the following context (User goals and Tool results) and 
-        generate the final IndexReport.
-        """),
-       ("human", "Here is the investment context:\n\n{context}")
-   ])
+   prompt = prompts.formatter_node_portfolio_prompt
    
    llm = get_llm()
    # Structured output works best when the input is plain text context
