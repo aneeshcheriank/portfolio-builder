@@ -187,15 +187,7 @@ def tool_call_node_stock_picker(state: AgentState):
     }
 
 def stock_picker_summarizer(state: AgentState)->str:
-    prompt = ChatPromptTemplate([
-        ("system", """
-    You are a financial reportor, with 10 years of experice in this field. Carefully go through the financail messages between various entites
-    and summariye the converation beteen various agents and tools.
-    CRITICAL:
-    Please makeup any information. Only summarize the information in this conversation
-    """),
-    ("human", "{chat_history}")
-    ])
+    prompt = prompts.stock_picker_summarizer_prompt
 
     llm = get_llm()
     chain = prompt | llm
