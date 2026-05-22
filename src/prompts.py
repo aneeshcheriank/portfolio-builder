@@ -1,4 +1,4 @@
-from langchain_core.messages import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 index_matcher_prompt = ChatPromptTemplate.from_messages([
     ("system",
@@ -41,7 +41,10 @@ index_picker_summurizer_prompt = ChatPromptTemplate.from_messages([
         ("system", """You are an expert financial reporter. 
          Review the following research context and extract the final details 
          into the required structured format."""),
-        ("human", "Research Context:\n\n{context}")
+        ("human", """
+         objective: {objective}
+         Research Context: {context}
+         """)
 ])
 
 stock_picker_prompt = ChatPromptTemplate.from_messages([
