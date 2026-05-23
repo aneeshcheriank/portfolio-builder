@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-# from scipy.optimize import minimize
-from scipy.optimize import differential_evolution
+from scipy.optimize import minimize
+# from scipy.optimize import differential_evolution
 from langchain_core.tools import tool
 import yfinance as yf
 
@@ -30,117 +30,6 @@ def get_stock_info(tickers):
         "sector_mapping": ticker_map,
         "daily_returns": daily_returns
     }
-
-# @tool
-# def optimize_portfolio_weights(tickers: list[str], alphas: list[str], target_vol: float) -> dict:
-#     """
-#     Optimizes portfolio weights using an aggressive Return-to-Risk objective.
-#     Args:
-#     - tickers: list of tickers
-#     - alphas: list of alpha (as float) values of the tickers
-#     - target_vol: target volatility
-#     Output:
-#     - dictionary of portfloio tickers and weights
-#     """
-#     try:
-#         n = len(tickers)
-#         alpha_values = np.array(alphas)
-#         data = get_stock_info(tickers)
-#         returns_df = data["daily_returns"]
-#         expected_returns = data["expected_returns"]
-#         cov_matrix = returns_df.cov() * 252
-        
-#         def objective(weights):
-#             portfolio_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
-#             portfolio_return = np.dot(weights, expected_returns)
-#             weighted_alpha = np.dot(weights, alpha_values)
-            
-#             # 1. We penalize being away from the target vol
-#             # 2. We incentivize HIGHER returns significantly
-#             # Scaling target vol error by 500 ensures we hit the risk target,
-#             # while scaling return by 10 ensures the solver 'cares' about the choice.
-#             return 500 * (portfolio_vol - target_vol)**2 - (portfolio_return * 5) - (weighted_alpha*15)
-
-#         constraints = [{'type': 'eq', 'fun': lambda x: np.sum(x) - 1.0}]
-        
-#         # Widen bounds further: 1% to 40%
-#         bounds = tuple((0.01, 0.40) for _ in range(n))
-        
-#         # STARTING POINT: Instead of 1/N, we start with 100% in the first stock.
-#         # This 'shocks' the solver into moving weights to satisfy constraints.
-#         init_guess = np.zeros(n)
-#         init_guess[0] = 1.0 
-
-#         # Lowering 'tol' (tolerance) forces the solver to work harder for a solution
-#         result = minimize(
-#             objective, 
-#             init_guess, 
-#             method='SLSQP', 
-#             bounds=bounds, 
-#             constraints=constraints,
-#             tol=1e-9 
-#         )
-
-#         if not result.success:
-#             return {"error": f"Optimization failed: {result.message}"}
-
-#         final_weights = {tickers[i]: round(float(result.x[i]), 4) for i in range(n)}
-        
-#         # Calculate final stats
-#         opt_weights = np.array(list(final_weights.values()))
-#         final_vol = np.sqrt(np.dot(opt_weights.T, np.dot(cov_matrix, opt_weights)))
-#         final_ret = np.dot(opt_weights, expected_returns)
-
-#         return {
-#             "final_weights": final_weights,
-#             "expected_annual_return": round(float(final_ret), 4),
-#             "expected_annual_volatility": round(float(final_vol), 4)
-#         }
-
-#     except Exception as e:
-#         return {"error": f"Tool failed: {str(e)}"}
-    
-# @tool
-# def optimize_portfolio_weights(tickers: list[str], alphas: list[float], target_vol: float) -> dict:
-#     """
-#     Optimizes portfolio weights using an aggressive Return-to-Risk objective.
-#     Args:
-#     - tickers: list of tickers
-#     - alphas: list of alpha (as float) values of the tickers
-#     - target_vol: target volatility
-#     Output:
-#     - dictionary of portfloio tickers and weights
-#     """
-#     n = len(tickers)
-#     data = get_stock_info(tickers)
-#     cov_matrix = data["daily_returns"].cov().values * 252
-#     expected_returns = data["expected_returns"].values
-#     alpha_values = np.array(alphas)
-
-#     def objective(weights):
-#         # Normalize weights within the objective to ensure sum=1 during exploration
-#         w = weights / np.sum(weights)
-#         portfolio_vol = np.sqrt(np.dot(w.T, np.dot(cov_matrix, w)))
-#         portfolio_return = np.dot(w, expected_returns)
-#         weighted_alpha = np.dot(w, alpha_values)
-        
-#         # We penalize the distance from target vol and maximize (return + alpha)
-#         return 100 * (portfolio_vol - target_vol)**2 - (portfolio_return + weighted_alpha)
-
-#     # Bounds for Differential Evolution (min 1%, max 40%)
-#     bounds = [(0.01, 0.40) for _ in range(n)]
-
-#     # Run Global Optimizer
-#     result = differential_evolution(objective, bounds, strategy='best1bin', tol=0.01)
-
-#     # Final normalization and rounding
-#     raw_weights = result.x / np.sum(result.x)
-#     final_weights = {tickers[i]: round(float(raw_weights[i]), 4) for i in range(n)}
-    
-#     return {"final_weights": final_weights}
-
-import numpy as np
-from scipy.optimize import minimize
 
 @tool
 def optimize_portfolio_weights(tickers: list[str], target_vol: float) -> dict:
