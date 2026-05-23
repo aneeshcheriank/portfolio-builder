@@ -17,3 +17,9 @@
 - .env file
     - create a .env file in the root folder
     - update the "DEEPSEEK = xxxxxxxxxxxxx" with the API KEY
+
+## Testing
+- to run all the test
+- `pytest`
+- to test a specific module
+- `pytest tests/test_model.py`

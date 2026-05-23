@@ -11,3 +11,6 @@ dotenv==0.9.9
 ddgs==9.14.4
 scipy==1.17.1
 
+# testing
+pytest==9.0.3
+
