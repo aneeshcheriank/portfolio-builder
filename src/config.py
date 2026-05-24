@@ -1,7 +1,7 @@
-
 """
 To configure global constants
 """
+
 # model config
 MODEL = "llama-3.3-70b-versatile"
 

@@ -1,10 +1,24 @@
 from langgraph.graph import StateGraph, START, END
 
-from src.agents import (index_matcher, tool_call_node, tool_router, summarizer_node, formatter_node, stock_picker, 
-                        tool_call_node_stock_picker, formatter_node_stock_picker, tool_router_stock_picker, stock_picker_summarizer,
-                        portfolio_optimizer, tool_call_node_portfolio_optimizer, tool_router_portfolio_optimizer, 
-                        summarizer_portfolio_optimizer, formatter_node_portfolio)
+from src.agents import (
+    index_matcher,
+    tool_call_node,
+    tool_router,
+    summarizer_node,
+    formatter_node,
+    stock_picker,
+    tool_call_node_stock_picker,
+    formatter_node_stock_picker,
+    tool_router_stock_picker,
+    stock_picker_summarizer,
+    portfolio_optimizer,
+    tool_call_node_portfolio_optimizer,
+    tool_router_portfolio_optimizer,
+    summarizer_portfolio_optimizer,
+    formatter_node_portfolio,
+)
 from src.state import AgentState
+
 
 def build_graph():
     workflow = StateGraph(AgentState)
@@ -14,7 +28,7 @@ def build_graph():
     workflow.add_node("tool_call", tool_call_node)
     workflow.add_node("summarizer_node", summarizer_node)
     workflow.add_node("formatter", formatter_node)
-    
+
     # stock picker
     workflow.add_node("stock_picker", stock_picker)
     workflow.add_node("tool_call_node_stock_picker", tool_call_node_stock_picker)
@@ -23,10 +37,11 @@ def build_graph():
 
     # portfolio optimizer
     workflow.add_node("portfolio_optimizer", portfolio_optimizer)
-    workflow.add_node("tool_call_portfolio_optimizer", tool_call_node_portfolio_optimizer)
+    workflow.add_node(
+        "tool_call_portfolio_optimizer", tool_call_node_portfolio_optimizer
+    )
     workflow.add_node("summarizer_portfolio_optimizer", summarizer_portfolio_optimizer)
     workflow.add_node("formatter_portfolio", formatter_node_portfolio)
-
 
     # edges
     workflow.add_edge(START, "index_matcher")
@@ -42,24 +57,29 @@ def build_graph():
 
     # conditional edge
     workflow.add_conditional_edges(
-        "index_matcher", tool_router, 
-        {"tool_call": "tool_call",
-         "summarizer_node": "summarizer_node"}
+        "index_matcher",
+        tool_router,
+        {"tool_call": "tool_call", "summarizer_node": "summarizer_node"},
     )
     # stock picker conditional edge
     workflow.add_conditional_edges(
-        "stock_picker", tool_router_stock_picker,
-        {"tool_call_node_stock_picker": "tool_call_node_stock_picker",
-         "stock_picker_summarizer": "stock_picker_summarizer"}
+        "stock_picker",
+        tool_router_stock_picker,
+        {
+            "tool_call_node_stock_picker": "tool_call_node_stock_picker",
+            "stock_picker_summarizer": "stock_picker_summarizer",
+        },
     )
 
     # stock picker conditional edge
     workflow.add_conditional_edges(
-        "portfolio_optimizer", tool_router_portfolio_optimizer,
-        {"tool_call_portfolio_optimizer": "tool_call_portfolio_optimizer",
-         "summarizer_portfolio_optimizer": "summarizer_portfolio_optimizer"}
+        "portfolio_optimizer",
+        tool_router_portfolio_optimizer,
+        {
+            "tool_call_portfolio_optimizer": "tool_call_portfolio_optimizer",
+            "summarizer_portfolio_optimizer": "summarizer_portfolio_optimizer",
+        },
     )
-
 
     compiled_workflow = workflow.compile()
 

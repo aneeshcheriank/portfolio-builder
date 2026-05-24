@@ -1,8 +1,10 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-index_matcher_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     """You are an expert financial portfolio manager. Your task is to match a client's risk and investment profile to the most appropriate index not ETFs or Stocks.
+index_matcher_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial portfolio manager. Your task is to match a client's risk and investment profile to the most appropriate index not ETFs or Stocks.
      you are expected to use tools to find the best index for a volatility target. You will be provided with a client's input describing their 
      investment goals and risk tolerance, and you must convert that into a target volatility. Then, using the get_best_index_for_volatility tool, 
      you will identify the best matching index.    
@@ -14,41 +16,63 @@ index_matcher_prompt = ChatPromptTemplate.from_messages([
      - You can call the tools at most 5-10 times
      - Do not repeatedly call the tool with similar input
      - If a close match is found, stop and provide the answer
-     """),
-    MessagesPlaceholder(variable_name="chat_history"),
-    ("human", "{user_input}")
-])
+     """,
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{user_input}"),
+    ]
+)
 
-index_picker_summurizer_prompt = prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
+index_picker_summurizer_prompt = prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
      the output from the previous tool calls, which includes the best matching index and its volatility, and format it into a clear and concise 
      report for the client. The report should include the recommended index, its actual volatility, how it compares to the client's target volatility, 
      and any relevant insights or recommendations based on this information. 
      user input: {user_input}
-     """),
-    MessagesPlaceholder(variable_name="chat_history")
-])
+     """,
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+    ]
+)
 
-index_picker_formatter_prompt = ChatPromptTemplate.from_messages([
-    ("system", """You are an expert financial reporter. 
+index_picker_formatter_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. 
      Review the following research context and extract the final details 
-     into the required structured format."""),
-    ("human", "Research Context:\n\n{context}")
-])
+     into the required structured format.""",
+        ),
+        ("human", "Research Context:\n\n{context}"),
+    ]
+)
 
-index_picker_summurizer_prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are an expert financial reporter. 
+index_picker_summurizer_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. 
          Review the following research context and extract the final details 
-         into the required structured format."""),
-        ("human", """
+         into the required structured format.""",
+        ),
+        (
+            "human",
+            """
          objective: {objective}
          Research Context: {context}
-         """)
-])
+         """,
+        ),
+    ]
+)
 
-stock_picker_prompt = ChatPromptTemplate.from_messages([
-    ("system","""
+stock_picker_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
     You are a financial equity screener.
     Your task is to select high-quality stocks from the given index: {base_index}, 
     based on the user's risk profile and investment objective.
@@ -92,34 +116,51 @@ stock_picker_prompt = ChatPromptTemplate.from_messages([
     OUTPUT:
     Return a list of selected stocks with their analytics.
     Do not calculate weights.
-    """),
-    ("human", """
+    """,
+        ),
+        (
+            "human",
+            """
      investment objective: {user_input}, base index: {base_index}, target volatility: {perceived_volatility}, risk free rate: {risk_free_rate}.
      stock picking history: {stock_picker_history}.
-     """),
-])
+     """,
+        ),
+    ]
+)
 
-stock_picker_summarizer_prompt = ChatPromptTemplate([
-    ("system", """
+stock_picker_summarizer_prompt = ChatPromptTemplate(
+    [
+        (
+            "system",
+            """
     You are a financial reportor, with 10 years of experice in this field. Carefully go through the financail messages between various entites
     and summariye the converation beteen various agents and tools.
     CRITICAL:
     Please makeup any information. Only summarize the information in this conversation
-    """),
-    ("human", "{chat_history}")
-])
+    """,
+        ),
+        ("human", "{chat_history}"),
+    ]
+)
 
-fromatter_node_stock_picker_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     """You are an expert financial reporter. 
+fromatter_node_stock_picker_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. 
      Take the following context (User goals and Tool results) and 
      generate the final IndexReport.
-     """),
-    ("human", "Here is the investment context:\n\n{context}")
-])
+     """,
+        ),
+        ("human", "Here is the investment context:\n\n{context}"),
+    ]
+)
 
-portfolio_optimizer_prompt = ChatPromptTemplate.from_messages([
-    ("system", """
+portfolio_optimizer_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
     ### ROLE
     You are a Senior Portfolio Manager specializing in Quantitative Asset Allocation. You have 10+ years of experience in Modern Portfolio Theory and Risk 
      Parity strategies.
@@ -150,13 +191,17 @@ portfolio_optimizer_prompt = ChatPromptTemplate.from_messages([
     - First, call `optimize_portfolio_weights` with the appropriate parameters.
     - Once you receive the tool output, verify that the weights sum to 100%.
     - If the tool fails, suggest an equal-weighted portfolio as a fallback and explain why.
-    """),
-    MessagesPlaceholder(variable_name="portfolio_optimizer_history")
-])
+    """,
+        ),
+        MessagesPlaceholder(variable_name="portfolio_optimizer_history"),
+    ]
+)
 
-summarize_portfolio_optimizer_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
+summarize_portfolio_optimizer_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. You have multiple years of experience in financial analysis and reporting. Your task is to take 
      the output from the previous tool calls, which messages to find the best portfolio weights for a target volatility.
      - Summarize the details (do not include extra information) for futher processing.
      - capture all informations
@@ -164,15 +209,21 @@ summarize_portfolio_optimizer_prompt = ChatPromptTemplate.from_messages([
      - You must use the EXACT weights provided in the last ToolMessage. 
      - DO NOT recalculate, round differently, or equalize the weights. 
      - If the tool says AAPL is 0.0829, you must report 0.0829.
-     """),
-    MessagesPlaceholder(variable_name="chat_history")
-])
+     """,
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+    ]
+)
 
-formatter_node_portfolio_prompt = ChatPromptTemplate.from_messages([
-   ("system",
-    """You are an expert financial reporter. 
+formatter_node_portfolio_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert financial reporter. 
     Take the following context (User goals and Tool results) and 
     generate the final IndexReport.
-    """),
-   ("human", "Here is the investment context:\n\n{context}")
-])
+    """,
+        ),
+        ("human", "Here is the investment context:\n\n{context}"),
+    ]
+)

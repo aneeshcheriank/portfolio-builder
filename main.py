@@ -8,20 +8,20 @@ if __name__ == "__main__":
     """
 
     workflow = build_graph()
-    response = workflow.invoke({
-        "user_input": question, # need to initialze the values in then only it will be availble to use in state variable
-        "investing_sum": 0,
-        "risk_class": "Low",
-        "expected_return": .02,
-
-        "chat_history": [],
-        "stock_picker_history": [],
-        "portfolio_optimizer_history": [],
-
-        "iterations": 0,
-        "iterations_stock_picker": 0,
-        "iterations_portfolio_optimizer": 0,
-        "risk_free_rate": 0.02
-    })
+    response = workflow.invoke(
+        {
+            "user_input": question,  # need to initialze the values in then only it will be availble to use in state variable
+            "investing_sum": 0,
+            "risk_class": "Low",
+            "expected_return": 0.02,
+            "chat_history": [],
+            "stock_picker_history": [],
+            "portfolio_optimizer_history": [],
+            "iterations": 0,
+            "iterations_stock_picker": 0,
+            "iterations_portfolio_optimizer": 0,
+            "risk_free_rate": 0.02,
+        }
+    )
 
     print(response["portfolio"])
