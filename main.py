@@ -1,5 +1,4 @@
 from src.chain import build_graph
-from src.agents import stock_picker
 
 if __name__ == "__main__":
 
