@@ -13,16 +13,16 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.12.13
+
     - name: Install dependencies
-      run:
-        make install
+      run: make install
+
     - name: Format code
-      run:
-        make format
+      run: make format
+
     - name: Lint with pylint
-      run:
-        make lint
+      run: make lint
+
     - name: Test with pytest
-      run:
-        make test
+      run: make test
     
