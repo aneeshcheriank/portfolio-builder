@@ -1,3 +1,6 @@
+## Status badge
+[![Python application test with GitHub Actions](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml/badge.svg)](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml)
+
 ## portfolio maker
 - objetive
     - create a portfolio for a risk and investable sum
