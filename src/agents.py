@@ -189,9 +189,7 @@ def tool_call_node_stock_picker(state: AgentState):
                     tool_call_id=tool_call.get("id"),
                 )
             )
-    # to test the tool response
-    # print(tool_messages)
-
+    
     return {
         "stock_picker_history": tool_messages,  # the tool_messages is a list
         "iterations_stock_picker": iterations,
@@ -209,14 +207,6 @@ def stock_picker_summarizer(state: AgentState) -> str:
 
 
 def formatter_node_stock_picker(state: AgentState):
-    # # 1. Convert the message history into a clean string for the reporter
-    # # This prevents the "Unknown Tool" error and the "List vs Object" error.
-    # context_string = ""
-    # for msg in state["stock_picker_history"]:
-    #     if hasattr(msg, 'content') and msg.content:
-    #         context_string += f"{msg.type}: {msg.content}\n"
-
-    # genearte ouput form the summarized output of the stock stock picker agents interactions
     last_message = state["stock_picker_history"][-1]
 
     prompt = prompts.fromatter_node_stock_picker_prompt
@@ -243,10 +233,6 @@ def tool_router_stock_picker(state: AgentState):
     last_state = state["stock_picker_history"][-1]
     if last_state.tool_calls:
         return "tool_call_node_stock_picker"
-
-    # # check the max_iterations
-    # if state["iterations"] >= MAX_TOOL_CALLS:
-    #     return "formatter"
 
     return "stock_picker_summarizer"
 
@@ -306,8 +292,6 @@ def tool_call_node_portfolio_optimizer(state: AgentState):
                     tool_call_id=tool_call.get("id"),
                 )
             )
-    # to test the tool response
-    # print(tool_messages)
 
     return {
         "portfolio_optimizer_history": tool_messages,  # the tool_messages is a list
