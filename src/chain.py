@@ -1,9 +1,10 @@
 from langgraph.graph import StateGraph, START, END
 
-from src.agents import (AgentState,index_matcher, tool_call_node, tool_router, summarizer_node, formatter_node, stock_picker, 
+from src.agents import (index_matcher, tool_call_node, tool_router, summarizer_node, formatter_node, stock_picker, 
                         tool_call_node_stock_picker, formatter_node_stock_picker, tool_router_stock_picker, stock_picker_summarizer,
                         portfolio_optimizer, tool_call_node_portfolio_optimizer, tool_router_portfolio_optimizer, 
                         summarizer_portfolio_optimizer, formatter_node_portfolio)
+from src.state import AgentState
 
 def build_graph():
     workflow = StateGraph(AgentState)
