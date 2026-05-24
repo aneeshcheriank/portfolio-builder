@@ -9,7 +9,7 @@ test:
 	# --cov specify the root folder for 
 
 format:
-	black *.py src/*.py tests/*.py
+	black *.py src/*.py tests/*.py main.py
 
 lint:
 	pylint --disable=R,C *.py
