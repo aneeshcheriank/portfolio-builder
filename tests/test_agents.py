@@ -156,7 +156,7 @@ def test_formatter_node_unwrapping(mock_prompts, mock_get_llm, base_agent_state)
 
     output = formatter_node(state)
 
-    assert output["investig sum"] == 5000.0
+    assert output["investing sum"] == 5000.0
     assert output["risk_class"] == "Medium"
     assert output["base_index"] == "S&P 500"
 
