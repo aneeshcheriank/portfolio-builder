@@ -1,5 +1,5 @@
 ## Status badge
-[![Python application test with GitHub Actions](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml/badge.svg)](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml)
+[![Python application test with GitHub Actions](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/ci.yaml/badge.svg)](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/ci.yaml)
 
 ---
 
