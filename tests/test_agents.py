@@ -1,5 +1,4 @@
 import pytest
-import json
 from unittest.mock import patch, MagicMock
 from langchain_core.messages import AIMessage, ToolMessage
 
@@ -8,13 +7,11 @@ from src.agents import (
     index_matcher,
     tool_call_node,
     tool_router,
-    summarizer_node,
     formatter_node,
     stock_picker,
     tool_call_node_stock_picker,
     tool_router_stock_picker,
     portfolio_optimizer,
-    tool_call_node_portfolio_optimizer,
     tool_router_portfolio_optimizer,
     formatter_node_portfolio,
 )
