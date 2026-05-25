@@ -1,10 +1,6 @@
 ## Status badge
 [![Python application test with GitHub Actions](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml/badge.svg)](https://github.com/aneeshcheriank/portfolio-builder/actions/workflows/makefile.yaml)
 
-Here is a complete, professional, and comprehensive `README.md` for your **Portfolio Builder** project.
-
-This README is designed based on your actual codebase architecture (using LangGraph for orchestration, DeepSeek as the core LLM agent engine, and mathematical optimization modules via SciPy).
-
 ---
 
 # Portfolio Builder 📈💼
@@ -81,18 +77,18 @@ cd portfolio-builder
 # Create environment
 python3 -m venv venv
 source venv/bin/activate
-
-# Install dependencies (or pip install -r requirements.txt if available)
-pip install langgraph langchain-core langchain-deepseek pandas numpy yfinance scipy pydantic pytest python-dotenv
-
 ```
+
+# Install dependencies
+`pip install -r requirements.txt`
+
 
 ### 4. Environment Variables Configuration
 
 Create a `.env` file in the root directory of your project:
 
 ```env
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
+DEEPSEEK=your_deepseek_api_key_here
 
 ```
 
