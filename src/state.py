@@ -22,6 +22,11 @@ class AgentState(TypedDict):
     filtered_stocks: schema.StockSelectionReport
     portfolio: schema.PortfolioReport
 
+    # Human in the loop feedback
+    explanation: str
+    feedback: str
+    approval: bool
+
     iterations: int
     iterations_stock_picker: int
     iterations_portfolio_optimizer: int
