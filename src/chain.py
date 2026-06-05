@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import InMemorySaver
 
 from src.agents import (
     index_matcher,
@@ -81,6 +82,7 @@ def build_graph():
         },
     )
 
-    compiled_workflow = workflow.compile()
+    memory_saver = InMemorySaver()
+    compiled_workflow = workflow.compile(checkpointer=memory_saver)
 
     return compiled_workflow
