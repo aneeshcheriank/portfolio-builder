@@ -22,6 +22,8 @@ if __name__ == "__main__":
             "iterations_stock_picker": 0,
             "iterations_portfolio_optimizer": 0,
             "risk_free_rate": 0.02,
+            "feedback": "",
+            "approval": False
         }, config
     )
 
