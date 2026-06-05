@@ -82,6 +82,8 @@ stock_picker_prompt = ChatPromptTemplate.from_messages(
     - Target volatility: {perceived_volatility}
     - Risk class of user: {risk_class}
     - Expected return: {expected_return}
+    - Feedback from the user: {feedback}
+    - Previous stock picking history: {stock_pick_history}
     
     INSTRUCTIONS:
     
@@ -169,6 +171,7 @@ portfolio_optimizer_prompt = ChatPromptTemplate.from_messages(
     Your goal is to allocate an investable sum {investing_sum} across a curated list of stocks to meet the client's risk and return objetives.
     The client has a risk of {user_risk} in 7 point risk scale ('Extremely Low', 'Very Low', 'Low', 'Medium', 'High', 'Very High', 'Extremely High')
     The expected return of the client is {expected_return}
+    The feedback from the client is {feedback}
      
     ### No of stocks
     - 1000 $: 5-10 stocks

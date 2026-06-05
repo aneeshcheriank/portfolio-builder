@@ -147,6 +147,8 @@ def stock_picker(state: AgentState):
             "investing_sum": state.get("investing_sum"),
             "expected_return": state.get("expected_return"),
             "risk_class": state.get("risk_class"),
+            "feedback": state.get("feedback"),
+            "stock_pick_history": state.get("stock_pick_history")
         }
     )
 
@@ -248,6 +250,7 @@ def portfolio_optimizer(state: AgentState):
             "investing_sum": state["investing_sum"],
             "user_risk": state["risk_class"],
             "expected_return": state["expected_return"],
+            "feedback": state.get("feedback"),
         }
     )
 
