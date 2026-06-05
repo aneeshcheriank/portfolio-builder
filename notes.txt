@@ -1,0 +1,26 @@
+## Structure of the config (InMemorySaver)
+
+```python
+config = {
+    # 1. Standard LangGraph Fields
+    "configurable": {
+        "thread_id": "session_12345",  # Unique ID for the conversation checkpoint
+        "checkpoint_id": "1ef23-abc...", # (Optional) Points to a specific turn in history
+    },
+    
+    # 2. Custom Metadata Fields (Optional)
+    "metadata": {
+        "user_id": "user_alice",
+        "app_version": "v2.1.0"
+    },
+    
+    # 3. Execution Tags (Optional)
+    "tags": ["production", "web_chat"]
+}
+```
+
+### configurable
+- thread_id: the memory location to look to get the converation historz
+y
+- checkpoint_id: more like the time in the converation history
+
