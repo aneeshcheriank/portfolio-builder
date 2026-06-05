@@ -1,4 +1,5 @@
-from typing import TypedDict, Annotated
+from typing import TypedDict, Annotated # Sequence[BaseMessage] to replace list
+from langgraph.graph.message import add_messages #replaced opeator.add
 import operator
 
 from src import schema
@@ -18,9 +19,7 @@ class AgentState(TypedDict):
     actual_volatility: float
     base_index: str
     risk_free_rate: float
-    filtered_stocks: (
-        schema.StockSelectionReport
-    )  # from python 3.9 onwards, we can use list[str] instead of List[str]
+    filtered_stocks: schema.StockSelectionReport
     portfolio: schema.PortfolioReport
 
     iterations: int

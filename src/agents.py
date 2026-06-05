@@ -1,7 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-import operator
 from langchain_core.messages import ToolMessage
-from langgraph.graph import END
 
 from src.model import get_llm
 from src.tools import (
@@ -115,7 +112,7 @@ def formatter_node(state: AgentState):
 
     return {
         "chat_history": [response],
-        "investig sum": report_data["investing_sum"],
+        "investing_sum": report_data["investing_sum"],
         "risk_class": report_data["risk_class"],
         "expected_return": report_data["expected_return"],
         "base_index": report_data["base_index"],

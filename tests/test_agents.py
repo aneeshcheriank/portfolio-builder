@@ -1,20 +1,17 @@
 import pytest
-import json
 from unittest.mock import patch, MagicMock
-from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
+from langchain_core.messages import AIMessage, ToolMessage
 
 # Import the orchestration nodes to test
 from src.agents import (
     index_matcher,
     tool_call_node,
     tool_router,
-    summarizer_node,
     formatter_node,
     stock_picker,
     tool_call_node_stock_picker,
     tool_router_stock_picker,
     portfolio_optimizer,
-    tool_call_node_portfolio_optimizer,
     tool_router_portfolio_optimizer,
     formatter_node_portfolio,
 )
@@ -159,7 +156,7 @@ def test_formatter_node_unwrapping(mock_prompts, mock_get_llm, base_agent_state)
 
     output = formatter_node(state)
 
-    assert output["investig sum"] == 5000.0
+    assert output["investing_sum"] == 5000.0
     assert output["risk_class"] == "Medium"
     assert output["base_index"] == "S&P 500"
 
