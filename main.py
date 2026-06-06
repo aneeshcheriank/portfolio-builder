@@ -28,4 +28,4 @@ if __name__ == "__main__":
     )
 
     print(response["portfolio"])
-    print(response["explanation"])
+    print(response["explanation"].content)
