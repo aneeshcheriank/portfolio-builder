@@ -9,7 +9,7 @@ from src.tools import (
     portfolio_optimizer_tool_mapping,
     portfolio_optimizer_tool_list,
 )
-from src.config import MAX_TOOL_CALLS
+from src.config import MAX_TOOL_CALLS, MAX_TOOL_CALLS_PORTFOLIO_OPTIMIZER
 from src.schema import IndexReport, StockSelectionReport, PortfolioReport
 from src.state import AgentState
 from src import prompts
@@ -238,9 +238,13 @@ def tool_router_stock_picker(state: AgentState):
 
 def portfolio_optimizer(state: AgentState):
     prompt = prompts.portfolio_optimizer_prompt
+    iteration = state["iterations_portfolio_optimizer"]
 
     llm = get_llm()
-    llm_with_tools = llm.bind_tools(portfolio_optimizer_tool_list)
+    if iteration >= MAX_TOOL_CALLS_PORTFOLIO_OPTIMIZER:
+        llm_with_tools = llm
+    else:
+        llm_with_tools = llm.bind_tools(portfolio_optimizer_tool_list)
 
     chain = prompt | llm_with_tools
     response = chain.invoke(
@@ -315,7 +319,6 @@ def summarizer_portfolio_optimizer(state: AgentState):
     llm = get_llm()
     chain = prompt | llm
     response = chain.invoke({"chat_history": state["portfolio_optimizer_history"]})
-
     return {"portfolio_optimizer_history": [response]}
 
 
@@ -335,3 +338,17 @@ def formatter_node_portfolio(state: AgentState):
     response = chain.invoke({"context": last_message.content})
     report_data = response.model_dump()
     return {"portfolio_optimizer_history": [response], "portfolio": report_data}
+
+
+def portfolio_explainer(state: AgentState):
+    prompt = prompts.portfolio_explainer_prompt
+
+    llm = get_llm()
+    chain = prompt | llm
+    response = chain.invoke({
+        "portfolio": state.get("portfolio"),
+        "user_input": state.get("user_input"),
+        "last_feedback": state.get("feedback")
+    })
+
+    return {"explanation": response}
