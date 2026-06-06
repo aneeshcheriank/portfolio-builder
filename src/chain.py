@@ -17,6 +17,7 @@ from src.agents import (
     tool_router_portfolio_optimizer,
     summarizer_portfolio_optimizer,
     formatter_node_portfolio,
+    portfolio_explainer,
 )
 from src.state import AgentState
 
@@ -43,6 +44,7 @@ def build_graph():
     )
     workflow.add_node("summarizer_portfolio_optimizer", summarizer_portfolio_optimizer)
     workflow.add_node("formatter_portfolio", formatter_node_portfolio)
+    workflow.add_node("portfolio_explainer", portfolio_explainer)
 
     # edges
     workflow.add_edge(START, "index_matcher")
@@ -54,7 +56,8 @@ def build_graph():
     workflow.add_edge("formatter_node_stock_picker", "portfolio_optimizer")
     workflow.add_edge("tool_call_portfolio_optimizer", "portfolio_optimizer")
     workflow.add_edge("summarizer_portfolio_optimizer", "formatter_portfolio")
-    workflow.add_edge("formatter_portfolio", END)
+    workflow.add_edge("formatter_portfolio", "portfolio_explainer")
+    workflow.add_edge("portfolio_explainer", END)
 
     # conditional edge
     workflow.add_conditional_edges(
