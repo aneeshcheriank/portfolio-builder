@@ -230,3 +230,17 @@ formatter_node_portfolio_prompt = ChatPromptTemplate.from_messages(
         ("human", "Here is the investment context:\n\n{context}"),
     ]
 )
+
+portfolio_explainer_prompt = ChatPromptTemplate.from_messages(
+    [("system", """
+    You are a financial advisor with 10 years of experience in client
+    communication. Your task is to explain the rationale behind the portfolio
+    allocation to the client in a clear and concise manner.
+     """),
+    ("human", """
+    You are provided with the following information:
+    - User Investment Objective: {user_input}
+    - selected portfolio: {portfolio}
+    - Feedback from the user: {last_feedback}
+    """)]
+)
