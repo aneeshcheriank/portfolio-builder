@@ -1,4 +1,5 @@
 from langchain_core.messages import ToolMessage
+from langgraph.graph import END
 
 from src.model import get_llm
 from src.tools import (
@@ -10,7 +11,12 @@ from src.tools import (
     portfolio_optimizer_tool_list,
 )
 from src.config import MAX_TOOL_CALLS, MAX_TOOL_CALLS_PORTFOLIO_OPTIMIZER
-from src.schema import IndexReport, StockSelectionReport, PortfolioReport
+from src.schema import (
+    IndexReport, 
+    StockSelectionReport, 
+    PortfolioReport,
+    FeedbackReport
+)
 from src.state import AgentState
 from src import prompts
 
@@ -336,7 +342,8 @@ def formatter_node_portfolio(state: AgentState):
     # 2. Invoke with a plain string variable instead of a message list
     response = chain.invoke({"context": last_message.content})
     report_data = response.model_dump()
-    return {"portfolio_optimizer_history": [response], "portfolio": report_data}
+    print("portfolio report: ", report_data)
+    return {"portfolio_optimizer_history": [response.model_dump_json()], "portfolio": report_data}
 
 
 def portfolio_explainer(state: AgentState):
@@ -349,5 +356,28 @@ def portfolio_explainer(state: AgentState):
         "user_input": state.get("user_input"),
         "last_feedback": state.get("feedback")
     })
-
+    print("explanation: ", response.content)
     return {"explanation": response}
+
+def feedback_collector(state: AgentState):
+    print("Do you have any suggestion or feedback on the preposed portfolio?")
+    feedback = input()
+
+    prompt = prompts.feedback_collector_prompt
+    llm = get_llm()
+    llm_with_structured_output = llm.with_structured_output(FeedbackReport)
+    chain = prompt | llm_with_structured_output
+    response = chain.invoke({"feedback": feedback})
+
+    output = response.model_dump()
+
+    return {
+        "feedback": output.get("change_request", []),
+        "approval": output.get("approved", False)
+    }
+
+def feedback_router(state: AgentState):
+    if state.get("approval"):
+        return END
+    else:
+        return "stock_picker"
