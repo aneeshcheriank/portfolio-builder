@@ -28,4 +28,7 @@ if __name__ == "__main__":
     )
 
     print(response["portfolio"])
-    print(response["explanation"].content)
+    # print(response["explanation"].content)
+    # print("feedabck from user: ", response.get("feedback"))
+    # print("approval from user: ", response.get("approval"))
+          
