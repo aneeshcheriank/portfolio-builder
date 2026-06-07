@@ -244,3 +244,18 @@ portfolio_explainer_prompt = ChatPromptTemplate.from_messages(
     - Feedback from the user: {last_feedback}
     """)]
 )
+
+feedback_collector_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", """
+         You are a feedback collector agent. Your task is to read the 
+         feedback provided by the user and determine if any changes has
+         make on the portfolio. If any changes are required, you have
+         to indimate the system that the user has not appoved the portfolio
+         and list the changes requested by the user.
+         if no changes are required, then you have to indimate the system
+         that the user has approved the portfolio.
+         """),
+         ("human", "feedback from the user: {feedback}")
+    ]
+)
