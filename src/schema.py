@@ -68,3 +68,7 @@ class PortfolioReport(BaseModel):
     # investment_period: str = Field(description="The period at which the user plan to invest e.g. 5 years")
     # estimated_annual_return: float = Field(description="The total value of the investment at the end of the investment period e.g. 10000 Euro")
     # projected_sum_at_the_end: float = Field(description="Expected annual return e.g. .07")
+
+class FeedbackReport(BaseModel):
+    approved: bool = Field(description = "Does the user approved the preposed portfolio?")
+    change_request: List[str] = Field(description = "If the user has any change request or suggestion for the preposed portfolio, it will be captured here. If not, it will be empty list.")
