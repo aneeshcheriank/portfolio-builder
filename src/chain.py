@@ -18,6 +18,8 @@ from src.agents import (
     summarizer_portfolio_optimizer,
     formatter_node_portfolio,
     portfolio_explainer,
+    feedback_collector,
+    feedback_router
 )
 from src.state import AgentState
 
@@ -45,6 +47,7 @@ def build_graph():
     workflow.add_node("summarizer_portfolio_optimizer", summarizer_portfolio_optimizer)
     workflow.add_node("formatter_portfolio", formatter_node_portfolio)
     workflow.add_node("portfolio_explainer", portfolio_explainer)
+    workflow.add_node("feedback_collector", feedback_collector)
 
     # edges
     workflow.add_edge(START, "index_matcher")
@@ -57,7 +60,8 @@ def build_graph():
     workflow.add_edge("tool_call_portfolio_optimizer", "portfolio_optimizer")
     workflow.add_edge("summarizer_portfolio_optimizer", "formatter_portfolio")
     workflow.add_edge("formatter_portfolio", "portfolio_explainer")
-    workflow.add_edge("portfolio_explainer", END)
+    workflow.add_edge("portfolio_explainer", "feedback_collector")
+    # workflow.add_edge("feedback_collector", END)
 
     # conditional edge
     workflow.add_conditional_edges(
@@ -83,6 +87,16 @@ def build_graph():
             "tool_call_portfolio_optimizer": "tool_call_portfolio_optimizer",
             "summarizer_portfolio_optimizer": "summarizer_portfolio_optimizer",
         },
+    )
+
+    # feedback conditional edge
+    workflow.add_conditional_edges(
+        "feedback_collector",
+        feedback_router,
+        {
+            END: END,
+            "stock_picker": "stock_picker"
+        }
     )
 
     memory_saver = InMemorySaver()
