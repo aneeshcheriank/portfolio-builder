@@ -101,3 +101,77 @@ if __name__ == "__main__":
             - If your agent is talking to a user and you want a ChatGPT-like experience where words appear on the screen bit-by-bit (token streaming), you use "messages".
             - uses
                 - Streaming raw text/tokens to a frontend chat interface.
+
+## Infinite loop
+```python
+# main.py
+from src.chain import build_graph
+from langgraph.errors import GraphInterrupt # If your version uses it, otherwise check state
+
+if __name__ == "__main__":
+    question = """
+    what is a good investment strategy for a moderate risk investor with 1000 to invest for 10 years?
+    """
+
+    workflow = build_graph()
+    config = {"configurable": {"thread_id": "thread-1"}}
+
+    # Initialize the graph
+    initial_state = {
+        "user_input": question,
+        "investing_sum": 0,
+        "risk_class": "Low",
+        "expected_return": 0.02,
+        "chat_history": [],
+        "stock_picker_history": [],
+        "portfolio_optimizer_history": [],
+        "iterations": 0,
+        "iterations_stock_picker": 0,
+        "iterations_portfolio_optimizer": 0,
+        "risk_free_rate": 0.02,
+        "feedback": "", 
+        "approval": False
+    }
+
+    # Step 1: First kick-off
+    print("--- Starting initial portfolio generation ---")
+    events = workflow.stream(initial_state, config, stream_mode="updates")
+    for event in events:
+        print(event)
+
+    # Step 2: Keep looping as long as the graph is interrupted before feedback_collector
+    while True:
+        state_snapshot = workflow.get_state(config)
+        
+        # Check if the graph is currently waiting at a breakpoint
+        if not state_snapshot.next:
+            # No next nodes means the graph finished completely (Hit END)
+            print("\n=== WORKFLOW COMPLETE ===")
+            break
+            
+        if "feedback_collector" in state_snapshot.next:
+            print("\n=== SYSTEM PAUSED FOR HUMAN REVIEW ===")
+            
+            # Print the current explanation to the user
+            current_values = state_snapshot.values
+            if "explanation" in current_values:
+                print(f"\nLatest Explanation: {current_values['explanation'].content}")
+            
+            # Take input safely
+            user_feedback_input = input("\nEnter suggestions, or type 'Approved' to finish: ")
+            
+            # If they approve, we can set approval directly or let the node process it
+            # Let's push the raw text in
+            workflow.update_state(
+                config,
+                {"feedback": user_feedback_input},
+                as_node="portfolio_explainer"
+            )
+            
+            print("\n--- Feedback injected. Resuming execution loop... ---")
+            
+            # Resume stream. It will run until it hits END or loops back to this breakpoint again!
+            events = workflow.stream(None, config, stream_mode="updates")
+            for event in events:
+                print(event)
+```
