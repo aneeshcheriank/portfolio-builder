@@ -46,7 +46,7 @@ def tool_call_node(state: AgentState):
     # increment the iteration count
     iterations = state["iterations"] + 1
 
-    print("tool_call")
+    # print("tool_call")
 
     tool_messages = []
     for tool_call in last_state.tool_calls:
@@ -113,7 +113,7 @@ def formatter_node(state: AgentState):
     # 2. Invoke with a plain string variable instead of a message list
     response = chain.invoke({"context": context_string})
     report_data = response.model_dump()
-    print(report_data)
+    # print(report_data)
 
     return {
         "chat_history": [response],
@@ -166,14 +166,14 @@ def tool_call_node_stock_picker(state: AgentState):
     # increment the iteration count
     iterations = state["iterations_stock_picker"] + 1
 
-    print(f"tool_call: {iterations}")
+    # print(f"tool_call: {iterations}")
 
     tool_messages = []
     for tool_call in last_state.tool_calls:
 
         name = tool_call.get("name")
         args = tool_call.get("args")
-        print(f"tool_call_name: {name}, args: {args}")
+        # print(f"tool_call_name: {name}, args: {args}")
 
         try:
             tool_mapping = stock_picker_tool_mapping
@@ -272,14 +272,14 @@ def tool_call_node_portfolio_optimizer(state: AgentState):
     # increment the iteration count
     iterations = state["iterations_portfolio_optimizer"] + 1
 
-    print(f"tool_call: {iterations}")
+    # print(f"tool_call: {iterations}")
 
     tool_messages = []
     for tool_call in last_state.tool_calls:
 
         name = tool_call.get("name")
         args = tool_call.get("args")
-        print(f"tool_call_name: {name}, args: {args}")
+        # print(f"tool_call_name: {name}, args: {args}")
 
         try:
             tool_mapping = portfolio_optimizer_tool_mapping
@@ -287,14 +287,14 @@ def tool_call_node_portfolio_optimizer(state: AgentState):
                 tool_response = tool_mapping[name].invoke(
                     args
                 )  # invoke expect dictionary as input
-                print(tool_response)
+                # print(tool_response)
                 tool_messages.append(
                     ToolMessage(
                         content=str(tool_response), tool_call_id=tool_call.get("id")
                     )
                 )
         except Exception as e:
-            print(f"exception in tool call: {e}")
+            # print(f"exception in tool call: {e}")
             tool_messages.append(
                 ToolMessage(
                     content=f"Error calling tool {name} with args {args}: {str(e)}",
@@ -342,7 +342,7 @@ def formatter_node_portfolio(state: AgentState):
     # 2. Invoke with a plain string variable instead of a message list
     response = chain.invoke({"context": last_message.content})
     report_data = response.model_dump()
-    print("portfolio report: ", report_data)
+    # print("portfolio report: ", report_data)
     return {"portfolio_optimizer_history": [response.model_dump_json()], "portfolio": report_data}
 
 
@@ -356,12 +356,14 @@ def portfolio_explainer(state: AgentState):
         "user_input": state.get("user_input"),
         "last_feedback": state.get("feedback")
     })
-    print("explanation: ", response.content)
+    # print("explanation: ", response.content)
     return {"explanation": response}
 
 def feedback_collector(state: AgentState):
-    print("Do you have any suggestion or feedback on the preposed portfolio?")
-    feedback = input()
+    feedback = state.get("feedback", "")
+    # if no feedback, the user is approving the portfolio.
+    if not feedback:
+        return {"approval": True}
 
     prompt = prompts.feedback_collector_prompt
     llm = get_llm()
