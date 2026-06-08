@@ -110,7 +110,8 @@ def test_graph_edges_exist():
     assert ("formatter_node_stock_picker", "portfolio_optimizer") in graph_edges
     assert ("tool_call_portfolio_optimizer", "portfolio_optimizer") in graph_edges
     assert ("summarizer_portfolio_optimizer", "formatter_portfolio") in graph_edges
-    assert ("formatter_portfolio", "__end__") in graph_edges
+    assert ("formatter_portfolio", "portfolio_explainer") in graph_edges
+    assert ("portfolio_explainer", "feedback_collector") in graph_edges
 
 
 def test_graph_conditional_edges_exist():
