@@ -100,6 +100,9 @@ def build_graph():
     )
 
     memory_saver = InMemorySaver()
-    compiled_workflow = workflow.compile(checkpointer=memory_saver)
+    compiled_workflow = workflow.compile(
+        checkpointer=memory_saver,
+        interrupt_before=["feedback_collector"]
+    )
 
     return compiled_workflow
