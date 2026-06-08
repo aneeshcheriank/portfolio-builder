@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -33,7 +33,8 @@ class Stock(BaseModel):
     beta: float = Field(
         description="The beta of the stock, indicating its volatility relative to the market."
     )
-    pe_ratio: float = Field(
+    pe_ratio: Optional[float] = Field(
+        default=None,
         description="The price-to-earnings ratio of the stock, indicating its valuation."
     )
 
