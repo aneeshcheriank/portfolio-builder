@@ -9,8 +9,8 @@ if __name__ == "__main__":
     workflow = build_graph()
     # a user identifier
     config = {"configurable": {"thread_id": "thread-1"}}
-    response = workflow.invoke(
-        {
+
+    initial_state = {
             "user_input": question,  # need to initialze the values in then only it will be availble to use in state variable
             "investing_sum": 0,
             "risk_class": "Low",
@@ -24,11 +24,34 @@ if __name__ == "__main__":
             "risk_free_rate": 0.02,
             "feedback": "",
             "approval": False
-        }, config
+        }
+    
+    print("-----------Executing Grpah-----------")
+    # use stream insted of invoke (this will allow to catch the breakpoint in the feedback collector node)
+    for event in workflow.stream(initial_state, config=config, stream_mode="updates"):
+        print(event)
+
+    # graph pause before the "feedback_collector" node
+    print("--------Graph Paused for Feedback--------")
+    print("The portfolio explanation has beed generated.")
+
+    user_feedback = input("Do you have any suggestion or feedback on the preposed portfolio? (press enter to approve)")
+
+    # update the feedback in the state
+    workflow.update_state(
+        config,
+        {"feedback": user_feedback},
+        as_node="portfolio_explainer" # the last executed node before the pause
     )
 
-    print(response["portfolio"])
-    # print(response["explanation"].content)
-    # print("feedabck from user: ", response.get("feedback"))
-    # print("approval from user: ", response.get("approval"))
-          
+    print("--------Resuming Graph Execution--------")
+    # resume the graph execution after getting the feedback
+    final_output = None
+    for event in workflow.stream(None, config, stream_mode="updates"):
+        print(event)
+        final_ouput = event
+
+    # ouputs
+    final_state = workflow.get_state(config).values
+    print("\n===========Final Result===========")
+    print("final portfolio:", final_state.get("portfolio"))
